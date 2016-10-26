@@ -27,7 +27,8 @@ Suggests: devtools,
           roxygen2,
           testthat,
           ggplot2,
-          mlbench
+          mlbench,
+          Matrix
 Collate:
          'astfun.R'
          'classes.R'
