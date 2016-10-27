@@ -35,27 +35,6 @@ public class TestFrameBuilder {
   private Key<Frame> key;
   private long numRows = NOT_SET;
 
-  private void createChunks(long start, long length, int cidx) {
-    NewChunk[] nchunks = Frame.createNewChunks(frameName, vecTypes, cidx);
-    for (int i = (int) start; i < start + length; i++) {
-
-      for (int colIdx = 0; colIdx < vecTypes.length; colIdx++) {
-        switch (vecTypes[colIdx]) {
-          case Vec.T_NUM:
-            nchunks[colIdx].addNum(numericData.get(colIdx)[i]);
-            break;
-          case Vec.T_STR:
-            nchunks[colIdx].addStr(stringData.get(colIdx)[i]);
-            break;
-          default:
-            throw new UnsupportedOperationException("Unsupported Vector type for the builder");
-
-        }
-      }
-    }
-    Frame.closeNewChunks(nchunks);
-  }
-
   public int getNumCols() {
     return numCols;
   }
@@ -148,6 +127,27 @@ public class TestFrameBuilder {
     }
     numericData.put(column, d);
     return this;
+  }
+
+  private void createChunks(long start, long length, int cidx) {
+    NewChunk[] nchunks = Frame.createNewChunks(frameName, vecTypes, cidx);
+    for (int i = (int) start; i < start + length; i++) {
+
+      for (int colIdx = 0; colIdx < vecTypes.length; colIdx++) {
+        switch (vecTypes[colIdx]) {
+          case Vec.T_NUM:
+            nchunks[colIdx].addNum(numericData.get(colIdx)[i]);
+            break;
+          case Vec.T_STR:
+            nchunks[colIdx].addStr(stringData.get(colIdx)[i]);
+            break;
+          default:
+            throw new UnsupportedOperationException("Unsupported Vector type for the builder");
+
+        }
+      }
+    }
+    Frame.closeNewChunks(nchunks);
   }
 
   private void checkVecTypes() {
