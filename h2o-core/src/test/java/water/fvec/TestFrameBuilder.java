@@ -9,8 +9,7 @@ import java.util.HashMap;
  * Class used for creating simple test frames using builder pattern
  * <p>
  * Example usage:
- * <pre>
- * {@code
+ * <pre>{@code
  * final Frame builder = new TestFrameBuilder()
  *   .withName("testFrame")
  *   .withColNames("ColA", "ColB")
