@@ -6,21 +6,24 @@ import water.Key;
 import java.util.HashMap;
 
 /**
- * Class used for creating simple testing frames using builder pattern
+ * Class used for creating simple test frames using builder pattern
  * <p>
  * Example usage:
+ * <pre>
  * {@code
  * final Frame builder = new TestFrameBuilder()
- * .withName("testFrame")
- * .withColNames("ColA", "ColB")
- * .withVecTypes(Vec.T_NUM, Vec.T_STR)
- * .withDataForCol(0, ard(Double.NaN, 1, 2, 3, 4, 5.6, 7))
- * .withDataForCol(1, ar("A", "B", "C", "E", "F", "I", "J"))
- * .withChunkLayout(2, 2, 2, 1)
- * .build();
+ *   .withName("testFrame")
+ *   .withColNames("ColA", "ColB")
+ *   .withVecTypes(Vec.T_NUM, Vec.T_STR)
+ *   .withDataForCol(0, ard(Double.NaN, 1, 2, 3, 4, 5.6, 7))
+ *   .withDataForCol(1, ar("A", "B", "C", "E", "F", "I", "J"))
+ *   .withChunkLayout(2, 2, 2, 1)
+ *   .build();
  * }
+ * </pre>
  */
 public class TestFrameBuilder {
+
   private static final long NOT_SET = -1;
   private HashMap<Integer, String[]> stringData = new HashMap<>();
   private HashMap<Integer, double[]> numericData = new HashMap<>();
@@ -29,7 +32,7 @@ public class TestFrameBuilder {
   private String[] colNames;
   private long[] chunkLayout;
   private int numCols;
-  Key<Frame> key;
+  private Key<Frame> key;
   private long numRows = NOT_SET;
 
   private void createChunks(long start, long length, int cidx) {
@@ -176,7 +179,7 @@ public class TestFrameBuilder {
   private void checkChunkLayout() {
     // this expects that method checkColumnData has been executed
     if (chunkLayout != null) {
-      // sum all numbers in it, it should be smaller than number of rows in the frame
+      // sum all numbers in the chunk layout, it should be smaller than the number of rows in the frame
       int sum = 0;
       for (long numPerChunk : chunkLayout) {
         sum += numPerChunk;
@@ -190,7 +193,6 @@ public class TestFrameBuilder {
 
   private void checkColumnData() {
     for (int colIdx = 0; colIdx < numCols; colIdx++) {
-
       switch (vecTypes[colIdx]) {
         case Vec.T_NUM:
           assert numericData.get(colIdx) != null : "Data for col " + colIdx + " has to be set";
