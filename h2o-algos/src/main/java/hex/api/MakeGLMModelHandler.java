@@ -140,7 +140,7 @@ public class MakeGLMModelHandler extends Handler {
     DataInfo dinfo = new DataInfo(frcpy,null,0,input.use_all_factor_levels,input.standardize?TransformType.STANDARDIZE:TransformType.NONE,TransformType.NONE,input.skip_missing,false,!input.skip_missing,/* weight */ false, /* offset */ false, /* fold */ false, /* intercept */ true);
     DKV.put(dinfo);
     if(weight != null)dinfo.setWeights(wname,weight);
-    Gram.GramTask gt = new Gram.GramTask(null,dinfo,false).doAll(dinfo._adaptedFrame);
+    Gram.GramTask gt = new Gram.GramTask(null,dinfo,false,true).doAll(dinfo._adaptedFrame);
     double [][] gram = gt._gram.getXX();
     dinfo.remove();
     String [] names = water.util.ArrayUtils.append(dinfo.coefNames(),"Intercept");

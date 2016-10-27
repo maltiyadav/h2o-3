@@ -740,16 +740,18 @@ public final class Gram extends Iced<Gram> {
     private  boolean _std = true;
     public Gram _gram;
     public long _nobs;
+    boolean _intercept = false;
 
     public GramTask(Key<Job> jobKey, DataInfo dinfo){
       super(null,dinfo,jobKey);
     }
-    public GramTask(Key<Job> jobKey, DataInfo dinfo, boolean std){
+    public GramTask(Key<Job> jobKey, DataInfo dinfo, boolean std, boolean intercept){
       super(null,dinfo,jobKey);
       _std = std;
+      _intercept = intercept;
     }
     @Override public void chunkInit(){
-      _gram = new Gram(_dinfo.fullN(), _dinfo.largestCat(), _dinfo.numNums(), _dinfo._cats, _dinfo._intercept);
+      _gram = new Gram(_dinfo.fullN(), _dinfo.largestCat(), _dinfo.numNums(), _dinfo._cats, _intercept);
     }
     double _prev = 0;
     @Override protected void processRow(DataInfo.Row r) {
