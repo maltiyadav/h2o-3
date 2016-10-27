@@ -276,11 +276,7 @@ h2o.getGLMFullRegularizationPath <- function(model) {
 #' @export
 h2o.computeGram <- function(X,weights="", use_all_factor_levels=FALSE,standardize=TRUE,skip_missing=FALSE) {
    res = .h2o.__remoteSend(method="GET", .h2o.__ComputeGram, X=h2o.getId(X),W=weights,use_all_factor_levels=use_all_factor_levels,standardize=standardize,skip_missing=skip_missing)
-   g = as.data.frame(h2o.getFrame(res$destination_frame$name))
-   h2o.rm(res$destination_frame$name)
-   m = as.matrix(g[,2:dim(g)[2]])
-   rownames(m) <- g[,1]
-   m
+   h2o.getFrame(res$destination_frame$name)
 }
 
 

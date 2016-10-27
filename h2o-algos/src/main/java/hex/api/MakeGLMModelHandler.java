@@ -17,6 +17,7 @@ import water.rapids.vals.ValFrame;
 
 import java.util.Arrays;
 import java.util.Map;
+import water.fvec.Vec.VectorGroup;
 
 /**
  * Created by tomasnykodym on 3/25/15.
@@ -143,11 +144,10 @@ public class MakeGLMModelHandler extends Handler {
     double [][] gram = gt._gram.getXX();
     dinfo.remove();
     String [] names = water.util.ArrayUtils.append(dinfo.coefNames(),"Intercept");
-    Vec [] vecs = new Vec[gram.length+1];
-    vecs[0] = Vec.makeVec(names,Vec.newKey());
-    Key[] keys = vecs[0].group().addVecs(vecs.length-1);
-    for(int i = 1; i < vecs.length; ++i)
-      vecs[i] = Vec.makeVec(gram[i-1],keys[i-1]);
+    Vec [] vecs = new Vec[gram.length];
+    Key[] keys = new VectorGroup().addVecs(vecs.length);
+    for(int i = 0; i < vecs.length; ++i)
+      vecs[i] = Vec.makeVec(gram[i],keys[i]);
     input.destination_frame = new KeyV3.FrameKeyV3();
     String keyname = input.X.key().toString();
     if(keyname.endsWith(".hex"))
@@ -162,11 +162,7 @@ public class MakeGLMModelHandler extends Handler {
       if(cnt == 1000) throw new IllegalArgumentException("unable to make unique key");
     }
     input.destination_frame.fillFromImpl(k);
-    String [] names2 = new String[names.length+1];
-    names2[0] = "names";
-    for(int i = 1; i < names2.length; ++i)
-      names2[i] = names[i-1];
-    DKV.put(new Frame(k, names2,vecs));
+    DKV.put(new Frame(k, names,vecs));
     return input;
   }
 }

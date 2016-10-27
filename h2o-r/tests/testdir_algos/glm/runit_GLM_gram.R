@@ -9,8 +9,11 @@ test.GLM.nonnegative <- function() {
   w = p[,3]*p[,2]
   names(w) <- c("w")
   X = h2o.cbind(df[x],w)
-  g = h2o.computeGram(X=X,weights="w",skip_missing=TRUE,standardize=TRUE)
-  ginvDiag = diag(solve(g))
+  gfr = h2o.computeGram(X=X,weights="w",skip_missing=TRUE,standardize=TRUE)
+  gm = as.matrix(gfr)
+  rownames(gm) <- colnames(gm)
+  h2o.rm(h2o.getId(gfr))
+  ginvDiag = diag(solve(gm))
   ginvDiag = ginvDiag[c(length(ginvDiag),1:length(ginvDiag)-1)]
   beta = m@model$coefficients_table[,6]
   names(beta) <- m@model$coefficients_table[,1]
@@ -18,13 +21,17 @@ test.GLM.nonnegative <- function() {
   zvalues_h2o = m@model$coefficients_table[,4]
   cbind(zvalues,zvalues_h2o)
   if(max(abs(zvalues-zvalues_h2o)) > 1e-4) fail("z-scores do not match")
+  #test 2 compare non-weighted non-standardized matrix to t(M) %*% M
   dfr = as.data.frame(df)
   X2 = df[c("CAPSULE","DPROS","RACE","DCAPS","AGE","PSA","VOL","GLEASON")]
   X2r = as.data.frame(X2)
   X2 = X2[,2:8]
   M = model.matrix(data = X2r,CAPSULE~.)
   G = t(M) %*% M
-  g2 = h2o.computeGram(X=X2,skip_missing=TRUE,standardize=FALSE)
-  if(max(abs(G[c(2:11,1),c(2:11,1)] - g2)) > 1e-8)fail("grams do not match")
+  gfr2 = h2o.computeGram(X=X2,skip_missing=TRUE,standardize=FALSE)
+  gm2 = as.matrix(gfr2)
+  rownames(gm2) <- colnames(gm2)
+  h2o.rm(h2o.getId(gfr2))
+  if(max(abs(G[c(2:11,1),c(2:11,1)] - gm2)) > 1e-8)fail("grams do not match")
 }
 doTest("GLM Test: Prostate", test.GLM.nonnegative)
