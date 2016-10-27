@@ -34,6 +34,8 @@ public class TestFrameBuilder {
   private int numCols;
   private Key<Frame> key;
   private long numRows = NOT_SET;
+  private String[][] domains = null;
+  private HashMap<Integer, int[]> categoriesPerCol = new HashMap<>();
 
   public int getNumCols() {
     return numCols;
@@ -129,6 +131,43 @@ public class TestFrameBuilder {
     return this;
   }
 
+  private String[] getUniqueValues( HashMap<String, Integer> mapping){
+   return mapping.keySet().toArray(new String[mapping.keySet().size()]);
+  }
+
+  private int[] getCategories(HashMap<String, Integer> mapping, String[] original){
+    int[] categoricals = new int[original.length];
+    for(int i = 0; i < original.length; i++) {
+      categoricals[i] = mapping.get(original[i]);
+    }
+    return categoricals;
+  }
+
+  private HashMap<String, Integer> getMapping(String[] array){
+   HashMap<String, Integer> mapping = new HashMap<>();
+    int level = 0;
+    for(int i = 0; i < array.length; i++){
+      if(!mapping.containsKey(array[i])){
+        mapping.put(array[i], level);
+        level++;
+      }
+    }
+    return mapping;
+  }
+
+  private void prepareCategoricals(){
+    // domains is not null if there is any T_CAT
+    for (int colIdx = 0; colIdx < vecTypes.length; colIdx++) {
+      if(vecTypes[colIdx]==Vec.T_CAT){
+        HashMap<String, Integer> mapping = getMapping(stringData.get(colIdx));
+        int[] categories = getCategories(mapping, stringData.get(colIdx));
+        domains[colIdx] = getUniqueValues(mapping);
+        categoriesPerCol.put(colIdx, categories);
+      }else{
+        domains[colIdx] = null;
+      }
+    }
+  }
   private void createChunks(long start, long length, int cidx) {
     NewChunk[] nchunks = Frame.createNewChunks(frameName, vecTypes, cidx);
     for (int i = (int) start; i < start + length; i++) {
@@ -141,6 +180,12 @@ public class TestFrameBuilder {
           case Vec.T_STR:
             nchunks[colIdx].addStr(stringData.get(colIdx)[i]);
             break;
+          case Vec.T_TIME:
+            nchunks[colIdx].addNum(numericData.get(colIdx)[i]);
+            break;
+          case Vec.T_CAT:
+            nchunks[colIdx].addCategorical(categoriesPerCol.get(colIdx)[i]);
+            break;
           default:
             throw new UnsupportedOperationException("Unsupported Vector type for the builder");
 
@@ -152,6 +197,14 @@ public class TestFrameBuilder {
 
   private void checkVecTypes() {
     assert vecTypes != null && vecTypes.length != 0 : "Vec types has to be specified";
+
+    // initiate domains if there are any categoricals
+    for(int i=0; i<vecTypes.length;i++){
+      if(vecTypes[i] == Vec.T_CAT){
+        domains = new String[vecTypes.length][];
+        break;
+      }
+    }
   }
 
   public TestFrameBuilder withChunkLayout(long... chunkLayout) {
@@ -166,6 +219,10 @@ public class TestFrameBuilder {
         colNames[i] = "col_" + i;
       }
     }
+  }
+
+  private void checkDomains(){
+
   }
 
   private void checkFrameName() {
@@ -223,7 +280,7 @@ public class TestFrameBuilder {
     checkColumnData();
     checkFrameName();
     checkChunkLayout();
-
+    prepareCategoricals();
     // Create a frame
     Frame f = new Frame(key);
     f.preparePartialFrame(colNames);
