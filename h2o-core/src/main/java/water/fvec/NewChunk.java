@@ -1646,4 +1646,85 @@ public class NewChunk extends Chunk {
   public int cidx() {
     return _cidx;
   }
+
+  public interface ChunkAppender {
+    void addDefault();
+    void addFrom(Chunk chk, int row);
+  }
+
+  public ChunkAppender createAppender(int type, Object defaultValue) {
+    switch (type) {
+      case Vec.T_NUM:
+      case Vec.T_CAT:
+      case Vec.T_TIME:
+        return new NumChunkAppender(defaultValue);
+      case Vec.T_STR:
+        return new StrChunkAppender(defaultValue);
+      case Vec.T_UUID:
+        return new UUIDChunkAppender(defaultValue);
+      default:
+        throw new IllegalArgumentException("Cannot create appender for type = " + type);
+    }
+  }
+
+  private class NumChunkAppender implements ChunkAppender {
+    private final double _defVal;
+
+    private NumChunkAppender(Object defVal) {
+      if (! (defVal instanceof Number)) {
+        throw new IllegalArgumentException("Default value needs to be numeric, value = " + defVal);
+      }
+      _defVal = ((Number) defVal).doubleValue();
+    }
+
+    @Override
+    public void addDefault() { addNum(_defVal); }
+
+    @Override
+    public void addFrom(Chunk chk, int row) {
+      if (chk.isNA(row)) addNA();
+      else addNum(chk.atd(row));
+    }
+  }
+
+  private class StrChunkAppender implements ChunkAppender {
+    private final String _defVal;
+
+    private StrChunkAppender(Object defVal) {
+      if (! (defVal instanceof String)) {
+        throw new IllegalArgumentException("Default value needs to be string, value = " + defVal);
+      }
+      _defVal = (String) defVal;
+    }
+
+    @Override
+    public void addDefault() { addStr(_defVal); }
+
+    @Override
+    public void addFrom(Chunk chk, int row) {
+      if (chk.isNA(row)) addNA();
+      else addStr(chk, row);
+    }
+  }
+
+  private class UUIDChunkAppender implements ChunkAppender {
+    private final UUID _defVal;
+
+    private UUIDChunkAppender(Object defVal) {
+      if (! (defVal instanceof UUID)) {
+        throw new IllegalArgumentException("Default value needs to be an UUID, value = " + defVal);
+      }
+      _defVal = (UUID) defVal;
+    }
+
+    @Override
+    public void addDefault() { addUUID(_defVal); }
+
+    @Override
+    public void addFrom(Chunk chk, int row) {
+      if (chk.isNA(row)) addNA();
+      else addUUID(chk, row);
+    }
+  }
+
 }
