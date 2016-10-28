@@ -7,6 +7,7 @@ import water.Key;
 import water.fvec.Frame;
 import water.rapids.Env;
 import water.rapids.ast.AstRoot;
+import water.rapids.ast.params.AstId;
 import water.rapids.vals.ValNum;
 import water.rapids.ast.AstPrimitive;
 
@@ -30,8 +31,8 @@ public class AstRename extends AstPrimitive {
 
   @Override
   public ValNum apply(Env env, Env.StackHelp stk, AstRoot asts[]) {
-    Key oldKey = Key.make(asts[1].exec(env).getStr());
-    Key newKey = Key.make(asts[2].exec(env).getStr());
+    Key oldKey = Key.make(env.expand(asts[1].exec(env).getStr()));
+    Key newKey = Key.make(env.expand(asts[2].exec(env).getStr()));
     Iced o = DKV.remove(oldKey).get();
     if (o instanceof Frame)
       DKV.put(newKey, new Frame(newKey, ((Frame) o)._names, ((Frame) o).vecs()));

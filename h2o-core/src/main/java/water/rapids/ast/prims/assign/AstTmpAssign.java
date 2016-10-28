@@ -4,6 +4,7 @@ import water.DKV;
 import water.Key;
 import water.fvec.Frame;
 import water.rapids.Env;
+import water.rapids.ast.params.AstId;
 import water.rapids.vals.ValFrame;
 import water.rapids.ast.AstPrimitive;
 import water.rapids.ast.AstRoot;
@@ -30,7 +31,7 @@ public class AstTmpAssign extends AstPrimitive {
 
   @Override
   public ValFrame apply(Env env, Env.StackHelp stk, AstRoot asts[]) {
-    Key<Frame> id = Key.make(asts[1].str());
+    Key<Frame> id = Key.make(env.expand(asts[1].str()));
     if (DKV.get(id) != null) throw new IllegalArgumentException("Temp ID " + id + " already exists");
     Frame src = stk.track(asts[2].exec(env)).getFrame();
     Frame dst = new Frame(id, src._names, src.vecs());

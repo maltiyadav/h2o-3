@@ -6,6 +6,7 @@ import water.Keyed;
 import water.Value;
 import water.fvec.Frame;
 import water.rapids.Env;
+import water.rapids.ast.params.AstId;
 import water.rapids.vals.ValNum;
 import water.rapids.ast.AstPrimitive;
 import water.rapids.ast.AstRoot;
@@ -31,7 +32,7 @@ public class AstRm extends AstPrimitive {
 
   @Override
   public ValNum apply(Env env, Env.StackHelp stk, AstRoot asts[]) {
-    Key id = Key.make(asts[1].str());
+    Key id = Key.make(env.expand(asts[1].str()));
     Value val = DKV.get(id);
     if (val == null) return new ValNum(0);
     if (val.isFrame())
