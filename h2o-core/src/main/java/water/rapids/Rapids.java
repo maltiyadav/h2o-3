@@ -1,10 +1,10 @@
 package water.rapids;
 
 import water.fvec.Frame;
+import water.rapids.ast.Ast;
 import water.rapids.ast.AstExec;
 import water.rapids.ast.AstUserDefinedFunction;
 import water.rapids.ast.AstParameter;
-import water.rapids.ast.AstRoot;
 import water.rapids.ast.params.*;
 import water.util.StringUtils;
 
@@ -14,8 +14,8 @@ import java.util.Set;
 /**
  * <p> Rapids is an interpreter of abstract syntax trees.
  *
- * <p> This file contains the AstRoot parser and parser helper functions.
- * AstRoot Execution starts in the AstExec file, but spreads throughout Rapids.
+ * <p> This file contains the Ast parser and parser helper functions.
+ * Ast Execution starts in the AstExec file, but spreads throughout Rapids.
  *
  * <p> Trees have a Lisp-like structure with the following "reserved" special
  * characters:
@@ -41,9 +41,9 @@ public class Rapids {
    * Parse a Rapids expression string into an Abstract Syntax Tree object.
    * @param rapids expression to parse
    */
-  public static AstRoot parse(String rapids) {
+  public static Ast parse(String rapids) {
     Rapids r = new Rapids(rapids);
-    AstRoot res = r.parseNext();
+    Ast res = r.parseNext();
     if (r.skipWS() != ' ')
       throw new IllegalASTException("Syntax error: illegal Rapids expression `" + rapids + "`");
     return res;
@@ -56,7 +56,7 @@ public class Rapids {
   public static Val exec(String rapids) {
     Session session = new Session();
     try {
-      AstRoot ast = Rapids.parse(rapids);
+      Ast ast = Rapids.parse(rapids);
       Val val = session.exec(ast, null);
       // Any returned Frame has it's REFCNT raised by +1, and the end(val) call
       // will account for that, copying Vecs as needed so that the returned
@@ -76,7 +76,7 @@ public class Rapids {
    */
   @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
   public static Val exec(String rapids, Session session) {
-    AstRoot ast = Rapids.parse(rapids);
+    Ast ast = Rapids.parse(rapids);
     // Synchronize the session, to stop back-to-back overlapping Rapids calls
     // on the same session, which Flow sometimes does
     synchronized (session) {
@@ -125,7 +125,7 @@ public class Rapids {
    * digits: a double
    * letters or other specials: an ID
    */
-  private AstRoot parseNext() {
+  private Ast parseNext() {
     switch (skipWS()) {
       case '(':  return parseFunctionApplication();
       case '{':  return parseFunctionDefinition();
@@ -145,7 +145,7 @@ public class Rapids {
    */
   private AstExec parseFunctionApplication() {
     eatChar('(');
-    ArrayList<AstRoot> asts = new ArrayList<>();
+    ArrayList<Ast> asts = new ArrayList<>();
     while (skipWS() != ')')
       asts.add(parseNext());
     eatChar(')');
@@ -154,7 +154,7 @@ public class Rapids {
       eatChar('-');
       eatChar('>');
       AstId tmpid = new AstId(token());
-      res = new AstExec(new AstRoot[]{new AstId("tmp="), tmpid, res});
+      res = new AstExec(new Ast[]{new AstId("tmp="), tmpid, res});
     }
     return res;
   }
@@ -182,7 +182,7 @@ public class Rapids {
     eatChar('.');
 
     // Parse the body
-    AstRoot body = parseNext();
+    Ast body = parseNext();
     if (skipWS() != '}')
       throw new IllegalASTException("Expected the end of the function, but found '" + peek(0) + "'");
     eatChar('}');
@@ -361,7 +361,7 @@ public class Rapids {
   //   return _str.substring(_x, _str.length());
   // }
 
-  //  public AstRoot throwErr(String msg) {
+  //  public Ast throwErr(String msg) {
   //    int idx = _str.length() - 1;
   //    int lo = _x, hi = idx;
   //
