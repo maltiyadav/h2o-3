@@ -1185,7 +1185,7 @@ NULL
     } else if (base::is.character(col)) {
        idx <- match(col, colnames(data))
         if (any(is.na(idx))){
-          stop(paste0("No column '", col[which(is.na(idx))], "' found in ",
+          stop(paste0("No column(s) '", paste(col[is.na(idx)], collapse=","), "' found in ",
             paste(colnames(data), collapse = ",")))
             col <- idx
        }
